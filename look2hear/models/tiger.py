@@ -534,7 +534,11 @@ class TIGER(BaseModel):
         self.eps = torch.finfo(torch.float32).eps
 
         # 0-1k (25 hop), 1k-2k (100 hop), 2k-4k (250 hop), 4k-8k (500 hop)
-        bandwidth_25 = int(np.floor(25 / (sample_rate / 2.) * self.enc_dim))
+        # normalized frequency (in [0, 1/2]) * nb of frequency bins
+
+        bandwidth_25 = int(np.floor(25 / (sample_rate / 2.) * self.enc_dim)) 
+        # n_25 := nb of bins representing an actual interval of 25Hz
+
         bandwidth_100 = int(np.floor(100 / (sample_rate / 2.) * self.enc_dim))
         bandwidth_250 = int(np.floor(250 / (sample_rate / 2.) * self.enc_dim))
         bandwidth_500 = int(np.floor(500 / (sample_rate / 2.) * self.enc_dim))
@@ -542,6 +546,10 @@ class TIGER(BaseModel):
         self.band_width += [bandwidth_100]*10
         self.band_width += [bandwidth_250]*8
         self.band_width += [bandwidth_500]*8
+
+        # self.band_width = [n_25 * 40 ; n_100 * 10; n_250 * 8; n_500 * 8; ]
+
+
         self.band_width.append(self.enc_dim - np.sum(self.band_width))
         self.nband = len(self.band_width)
         print(self.band_width)
@@ -591,14 +599,17 @@ class TIGER(BaseModel):
         if input.ndim == 3:
             input = input
         batch_size, nch, nsample = input.shape
-        input = input.view(batch_size*nch, -1)
+        input = input.view(batch_size*nch, -1) 
+        
+        # B*C, L
 
         # frequency-domain separation
         spec = torch.stft(input, n_fft=self.win, hop_length=self.stride, 
                           window=torch.hann_window(self.win).to(input.device).type(input.type()),
                           return_complex=True)
-
-        # print(spec.shape)
+        
+        # print(spec.shape) 
+        # B*C, F, T
 
         # concat real and imag, split to subbands
         spec_RI = torch.stack([spec.real, spec.imag], 1)  # B*nch, 2, F, T
