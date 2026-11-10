@@ -30,10 +30,19 @@ class MP3DDataset(Dataset):
         json_dir: str = "",
         n_src: int = 2,
         sample_rate: int = 8000,
-        segment: float = 4.0,
+        segment: float = 4.0, #seconds
         normalize_audio: bool = False,
+        subset_percentile: float = None,
+        subset_mode: str = "close",
+        subset_fixed_samples: int = None,
+        subset_seed: int = 42,
+        subset_range: tuple = None,
+        in_memory: bool = False,
     ) -> None:
         super().__init__()
+        self.in_memory = in_memory
+        self.cached_mix = None
+        self.cached_sources = None
         self.EPS = 1e-8
         if json_dir == None:
             raise ValueError("JSON DIR is None!")
@@ -51,6 +60,21 @@ class MP3DDataset(Dataset):
             
         self.n_src = n_src
         self.test = self.seg_len is None
+        if subset_percentile is None and "TIGER_SUBSET_PERCENTILE" in os.environ:
+            try:
+                subset_percentile = float(os.environ["TIGER_SUBSET_PERCENTILE"])
+            except ValueError:
+                subset_percentile = None
+        if subset_mode is None or subset_mode == "close":
+            subset_mode = os.environ.get("TIGER_SUBSET_MODE", subset_mode)
+        self.subset_percentile = subset_percentile
+        self.subset_mode = subset_mode
+
+        self.subset_fixed_samples = subset_fixed_samples
+        self.subset_seed = subset_seed
+        self.subset_range = subset_range
+        self.subset_range = subset_range
+
         mix_json = os.path.join(json_dir, "mix.json")
         sources_json = [
             os.path.join(json_dir, source + ".json") for source in ["s1", "s2"]
@@ -65,7 +89,8 @@ class MP3DDataset(Dataset):
 
         self.mix = []
         self.sources = []
-        if self.n_src == 1:
+
+        if self.n_src == 1: # speaker isolation
             orig_len = len(mix_infos) * 2
             drop_utt, drop_len = 0, 0
             if not self.test:
@@ -93,7 +118,7 @@ class MP3DDataset(Dataset):
             )
             self.length = len(self.mix)
 
-        elif self.n_src == 2:
+        elif self.n_src == 2: # 2 speaker separation
             orig_len = len(mix_infos)
             drop_utt, drop_len = 0, 0
             if not self.test:
@@ -110,9 +135,66 @@ class MP3DDataset(Dataset):
                     drop_utt, drop_len / sample_rate / 36000, orig_len, self.seg_len
                 )
             )
+            # --- Découpage du subset (déciles disjoints / ranges / percentiles cumulés) ---
+            if not self.test and (self.subset_range is not None or self.subset_percentile is not None or self.subset_fixed_samples is not None):
+                total_utts = len(mix_infos)
+
+                if self.subset_range is not None:
+                    # Décile disjoint ou tranche explicite [start_pct, end_pct]
+                    start_pct, end_pct = self.subset_range
+                    start_idx = int(total_utts * start_pct)
+                    end_idx = int(total_utts * end_pct) if end_pct < 1.0 else total_utts
+                    pool_indices = list(range(start_idx, end_idx))
+                    print_(
+                        f"[EchoSet] Tranche disjointe active : [{start_pct*100:.1f}% - {end_pct*100:.1f}%] "
+                        f"-> indices {start_idx} à {end_idx} ({len(pool_indices)} paires)"
+                    )
+                elif self.subset_mode == "random":
+                    # Groupe contrôle / Baseline aléatoire
+                    pool_indices = list(range(total_utts))
+                elif self.subset_percentile is not None and self.subset_percentile < 1.0:
+                    n_pool = max(1, int(total_utts * self.subset_percentile))
+                    if self.subset_mode == "close":
+                        pool_indices = list(range(n_pool))
+                    elif self.subset_mode == "far":
+                        pool_indices = list(range(total_utts - n_pool, total_utts))
+                else:
+                    pool_indices = list(range(total_utts))
+
+                # Étape 2 : Sous-échantillonnage uniforme à taille fixe N si demandé
+                if self.subset_fixed_samples is not None and self.subset_fixed_samples < len(pool_indices):
+                    rng = np.random.RandomState(self.subset_seed)
+                    selected_indices = sorted(rng.choice(pool_indices, size=self.subset_fixed_samples, replace=False))
+                else:
+                    selected_indices = pool_indices
+
+                # Application de la sélection
+                mix_infos = [mix_infos[i] for i in selected_indices]
+                sources_infos = [[src[i] for i in selected_indices] for src in sources_infos]
+
+                print_(
+                    f"[EchoSet] Subset '{self.subset_mode}' activé : "
+                    f"{len(mix_infos)} paires sélectionnées sur un pool de {len(pool_indices)} "
+                    f"(taille totale dataset: {total_utts})"
+                )
+
             self.mix = mix_infos
             self.sources = sources_infos
             self.length = len(self.mix)
+
+            if self.in_memory:
+                print_(f"[EchoSet] Preloading {self.length} audio pairs into RAM...")
+                self.cached_mix = []
+                self.cached_sources = [[] for _ in range(len(self.sources))]
+                for i in range(self.length):
+                    # Load full mixture
+                    x, _ = sf.read(self.mix[i][0], dtype="float32")
+                    self.cached_mix.append(x)
+                    # Load sources
+                    for s_idx, src in enumerate(self.sources):
+                        s, _ = sf.read(src[i][0], dtype="float32")
+                        self.cached_sources[s_idx].append(s)
+                print_(f"[EchoSet] Successfully preloaded {self.length} pairs into RAM.")
 
     def __len__(self):
         return self.length
@@ -154,17 +236,23 @@ class MP3DDataset(Dataset):
                 stop = None
             else:
                 stop = rand_start + self.seg_len
-            # Load mixture
-            x, _ = sf.read(
-                self.mix[idx][0], start=rand_start, stop=stop, dtype="float32"
-            )
-            # Load sources
-            source_arrays = []
-            for src in self.sources:
-                s, _ = sf.read(
-                    src[idx][0], start=rand_start, stop=stop, dtype="float32"
+            # Load mixture and sources (from RAM cache if enabled, else disk)
+            if self.in_memory and self.cached_mix is not None:
+                x = self.cached_mix[idx][rand_start:stop] if stop is not None else self.cached_mix[idx][rand_start:]
+                source_arrays = [
+                    self.cached_sources[s_idx][idx][rand_start:stop] if stop is not None else self.cached_sources[s_idx][idx][rand_start:]
+                    for s_idx in range(len(self.sources))
+                ]
+            else:
+                x, _ = sf.read(
+                    self.mix[idx][0], start=rand_start, stop=stop, dtype="float32"
                 )
-                source_arrays.append(s)
+                source_arrays = []
+                for src in self.sources:
+                    s, _ = sf.read(
+                        src[idx][0], start=rand_start, stop=stop, dtype="float32"
+                    )
+                    source_arrays.append(s)
             sources = torch.from_numpy(np.vstack(source_arrays))
             mixture = torch.from_numpy(x)
 
@@ -194,8 +282,17 @@ class EchoSetDataModule(object):
         num_workers: int = 0,
         pin_memory: bool = False,
         persistent_workers: bool = False,
+        subset_percentile: float = None,
+        subset_mode: str = "close",
+        subset_fixed_samples: int = None,
+        subset_seed: int = 42,
+        subset_range: tuple = None,
+        in_memory: bool = False,
     ) -> None:
         super().__init__()
+        self.in_memory = in_memory
+        self.cached_mix = None
+        self.cached_sources = None
         if train_dir == None or valid_dir == None or test_dir == None:
             raise ValueError("JSON DIR is None!")
         if n_src not in [1, 2]:
@@ -213,7 +310,13 @@ class EchoSetDataModule(object):
         self.num_workers = num_workers
         self.pin_memory = pin_memory
         self.persistent_workers = persistent_workers
-
+        self.subset_percentile = subset_percentile
+        self.subset_mode = subset_mode
+        self.subset_fixed_samples = subset_fixed_samples
+        self.subset_seed = subset_seed
+        self.subset_range = subset_range
+        self.subset_range = subset_range
+        
         self.data_train: Dataset = None
         self.data_val: Dataset = None
         self.data_test: Dataset = None
@@ -225,6 +328,12 @@ class EchoSetDataModule(object):
             sample_rate=self.sample_rate,
             segment=self.segment,
             normalize_audio=self.normalize_audio,
+            subset_percentile=self.subset_percentile,
+            subset_mode=self.subset_mode,
+            subset_fixed_samples=self.subset_fixed_samples,
+            subset_seed=self.subset_seed,
+            subset_range=self.subset_range,
+            in_memory=self.in_memory,
         )
         self.data_val = MP3DDataset(
             json_dir=self.valid_dir,

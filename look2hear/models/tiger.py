@@ -6,7 +6,7 @@ import torch.nn.functional as F
 import math
 from .base_model import BaseModel
 from ..layers import activations, normalizations
-
+from tests_adrien.scripts.bandwidth import get_bandwidth_from_split
 
 def GlobLN(nOut):
     return nn.GroupNorm(1, nOut, eps=1e-8)
@@ -521,6 +521,7 @@ class TIGER(BaseModel):
         stride=512,
         num_sources=2,
         sample_rate=44100,
+        frequency_split="low_frequency_narrow_split",  
     ):
         super(TIGER, self).__init__(sample_rate=sample_rate)
         
@@ -533,24 +534,28 @@ class TIGER(BaseModel):
         self.num_output = num_sources
         self.eps = torch.finfo(torch.float32).eps
 
-        # 0-1k (25 hop), 1k-2k (100 hop), 2k-4k (250 hop), 4k-8k (500 hop)
-        # normalized frequency (in [0, 1/2]) * nb of frequency bins
+        # # 0-1k (25 hop), 1k-2k (100 hop), 2k-4k (250 hop), 4k-8k (500 hop)
+        # # normalized frequency (in [0, 1/2]) * nb of frequency bins
 
-        bandwidth_25 = int(np.floor(25 / (sample_rate / 2.) * self.enc_dim)) 
-        # n_25 := nb of bins representing an actual interval of 25Hz
+        # bandwidth_25 = int(np.floor(25 / (sample_rate / 2.) * self.enc_dim)) 
+        # # n_25 := nb of bins representing an actual interval of 25Hz
 
-        bandwidth_100 = int(np.floor(100 / (sample_rate / 2.) * self.enc_dim))
-        bandwidth_250 = int(np.floor(250 / (sample_rate / 2.) * self.enc_dim))
-        bandwidth_500 = int(np.floor(500 / (sample_rate / 2.) * self.enc_dim))
-        self.band_width = [bandwidth_25]*40
-        self.band_width += [bandwidth_100]*10
-        self.band_width += [bandwidth_250]*8
-        self.band_width += [bandwidth_500]*8
+        # bandwidth_100 = int(np.floor(100 / (sample_rate / 2.) * self.enc_dim))
+        # bandwidth_250 = int(np.floor(250 / (sample_rate / 2.) * self.enc_dim))
+        # bandwidth_500 = int(np.floor(500 / (sample_rate / 2.) * self.enc_dim))
+        # self.band_width = [bandwidth_25]*40
+        # self.band_width += [bandwidth_100]*10
+        # self.band_width += [bandwidth_250]*8
+        # self.band_width += [bandwidth_500]*8
 
-        # self.band_width = [n_25 * 40 ; n_100 * 10; n_250 * 8; n_500 * 8; ]
+        # self.band_width = [n_25 * 40 ; n_100 * 10; n_250 * 8; n_500 * 8; n_remain * 1]
+
+        self.frequency_split = frequency_split
+        self.band_width = get_bandwidth_from_split(self.frequency_split, self.sample_rate, self.enc_dim)
 
 
-        self.band_width.append(self.enc_dim - np.sum(self.band_width))
+        # self.band_width.append(self.enc_dim - np.sum(self.band_width))
+
         self.nband = len(self.band_width)
         print(self.band_width)
         

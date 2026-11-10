@@ -1,0 +1,76 @@
+# Network config
+audionet:
+  audionet_name: TIGER
+  audionet_config:
+    out_channels: 128
+    in_channels: 256
+    num_blocks: 4
+    upsampling_depth: 3
+    win: 640
+    stride: 160
+    num_sources: 2
+
+# Loss config
+loss:
+  train:
+    loss_func: PITLossWrapper
+    sdr_type: pairwise_neg_snr
+    config:
+      pit_from: pw_mtx
+      threshold_byloss: false
+  val:
+    loss_func: PITLossWrapper
+    sdr_type: pairwise_neg_sisdr
+    config:
+      pit_from: pw_mtx
+      threshold_byloss: false
+
+# Training config
+training:
+  system: AudioLightningModule
+  gpus: [0,1,2,3,4,5]
+  parallel: ddp
+  epochs: 80
+  early_stop:
+    monitor: val_loss/dataloader_idx_0
+    mode: min
+    patience: 20
+    verbose: true
+  SpeedAug: False
+  
+# Optim config
+optimizer:
+  optim_name: adam
+  lr: 0.0005
+  weight_decay: 0
+
+# Sche config
+scheduler: 
+  sche_name: ReduceLROnPlateau
+  sche_config:
+    patience: 10
+    factor: 0.5
+
+# Data config
+datamodule:
+  data_name: EchoSetDataModule
+  data_config:
+    train_dir: DataPreProcess/EchoSet_cleaned/rankings/F0semitoneFrom27.5Hz_sma3nz_amean
+    valid_dir: DataPreProcess/EchoSet_cleaned/val
+    test_dir: DataPreProcess/EchoSet_cleaned/test
+    subset_percentile: 0.50   
+    subset_mode: close       
+    subset_fixed_samples: 2026
+    n_src: 2
+    sample_rate: 16000
+    segment: 2.0
+    normalize_audio: false
+    batch_size: 3
+    num_workers: 2
+    pin_memory: true
+    persistent_workers: true
+    # in_memory: true   
+
+
+exp:
+  exp_name: TIGER-EchoSet-top50-f0-reduced_nb_blocks

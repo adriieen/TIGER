@@ -1,0 +1,195 @@
+{
+  "train": {
+    "total_pairs": 20268,
+    "gender_pair_distribution": {
+      "counts": {
+        "M/M": 5103,
+        "M/F": 10126,
+        "F/F": 5039,
+        "Unknown": 0
+      },
+      "percentages": {
+        "M/M": 25.18,
+        "M/F": 49.96,
+        "F/F": 24.86,
+        "Unknown": 0.0
+      }
+    },
+    "dataset_quality_pair_distribution": {
+      "counts": {
+        "clean/clean": 20268,
+        "clean/other": 0,
+        "other/other": 0,
+        "Unknown": 0
+      },
+      "percentages": {
+        "clean/clean": 100.0,
+        "clean/other": 0.0,
+        "other/other": 0.0,
+        "Unknown": 0.0
+      }
+    },
+    "unique_speakers": {
+      "total": 251,
+      "counts": {
+        "clean": 251,
+        "other": 0,
+        "Unknown": 0
+      },
+      "percentages": {
+        "clean": 100.0,
+        "other": 0.0,
+        "Unknown": 0.0
+      },
+      "subset_counts": {
+        "train-clean-100": 251
+      }
+    },
+    "missing_speaker_ids": []
+  },
+  "val": {
+    "total_pairs": 4604,
+    "gender_pair_distribution": {
+      "counts": {
+        "M/M": 1122,
+        "M/F": 2357,
+        "F/F": 1125,
+        "Unknown": 0
+      },
+      "percentages": {
+        "M/M": 24.37,
+        "M/F": 51.19,
+        "F/F": 24.44,
+        "Unknown": 0.0
+      }
+    },
+    "dataset_quality_pair_distribution": {
+      "counts": {
+        "clean/clean": 4604,
+        "clean/other": 0,
+        "other/other": 0,
+        "Unknown": 0
+      },
+      "percentages": {
+        "clean/clean": 100.0,
+        "clean/other": 0.0,
+        "other/other": 0.0,
+        "Unknown": 0.0
+      }
+    },
+    "unique_speakers": {
+      "total": 40,
+      "counts": {
+        "clean": 40,
+        "other": 0,
+        "Unknown": 0
+      },
+      "percentages": {
+        "clean": 100.0,
+        "other": 0.0,
+        "Unknown": 0.0
+      },
+      "subset_counts": {
+        "dev-clean": 40
+      }
+    },
+    "missing_speaker_ids": []
+  },
+  "test": {
+    "total_pairs": 2650,
+    "gender_pair_distribution": {
+      "counts": {
+        "M/M": 637,
+        "M/F": 1369,
+        "F/F": 644,
+        "Unknown": 0
+      },
+      "percentages": {
+        "M/M": 24.04,
+        "M/F": 51.66,
+        "F/F": 24.3,
+        "Unknown": 0.0
+      }
+    },
+    "dataset_quality_pair_distribution": {
+      "counts": {
+        "clean/clean": 2650,
+        "clean/other": 0,
+        "other/other": 0,
+        "Unknown": 0
+      },
+      "percentages": {
+        "clean/clean": 100.0,
+        "clean/other": 0.0,
+        "other/other": 0.0,
+        "Unknown": 0.0
+      }
+    },
+    "unique_speakers": {
+      "total": 40,
+      "counts": {
+        "clean": 40,
+        "other": 0,
+        "Unknown": 0
+      },
+      "percentages": {
+        "clean": 100.0,
+        "other": 0.0,
+        "Unknown": 0.0
+      },
+      "subset_counts": {
+        "test-clean": 40
+      }
+    },
+    "missing_speaker_ids": []
+  },
+  "overall": {
+    "total_pairs": 27522,
+    "gender_pair_distribution": {
+      "counts": {
+        "M/M": 6862,
+        "M/F": 13852,
+        "F/F": 6808,
+        "Unknown": 0
+      },
+      "percentages": {
+        "M/M": 24.93,
+        "M/F": 50.33,
+        "F/F": 24.74,
+        "Unknown": 0.0
+      }
+    },
+    "dataset_quality_pair_distribution": {
+      "counts": {
+        "clean/clean": 27522,
+        "clean/other": 0,
+        "other/other": 0,
+        "Unknown": 0
+      },
+      "percentages": {
+        "clean/clean": 100.0,
+        "clean/other": 0.0,
+        "other/other": 0.0,
+        "Unknown": 0.0
+      }
+    },
+    "unique_speakers": {
+      "total": 331,
+      "counts": {
+        "clean": 331,
+        "other": 0,
+        "Unknown": 0
+      },
+      "percentages": {
+        "clean": 100.0,
+        "other": 0.0,
+        "Unknown": 0.0
+      },
+      "subset_counts": {
+        "train-clean-100": 251,
+        "dev-clean": 40,
+        "test-clean": 40
+      }
+    }
+  }
+}

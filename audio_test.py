@@ -35,7 +35,7 @@ parser.add_argument("--conf_dir",
 
 
 compute_metrics = ["si_sdr", "sdr"]
-os.environ['CUDA_VISIBLE_DEVICES'] = "8"
+os.environ['CUDA_VISIBLE_DEVICES'] = "1"
 
 def main(config):
     metricscolumn = MyMetricsTextColumn(style=RichProgressBarTheme.metrics)
@@ -52,10 +52,19 @@ def main(config):
         metricscolumn
     )
     # import pdb; pdb.set_trace()
-    config["train_conf"]["main_args"]["exp_dir"] = os.path.join(
+
+    # config["train_conf"]["main_args"]["exp_dir"] = os.path.join(
+    #     os.getcwd(), "Experiments", "checkpoint", config["train_conf"]["exp"]["exp_name"]
+    # )
+    # model_path = os.path.join(config["train_conf"]["main_args"]["exp_dir"], "best_model.pth")
+
+    exp_dir = os.path.join(
         os.getcwd(), "Experiments", "checkpoint", config["train_conf"]["exp"]["exp_name"]
     )
-    model_path = os.path.join(config["train_conf"]["main_args"]["exp_dir"], "best_model.pth")
+    config["train_conf"]["main_args"] = {"exp_dir": exp_dir}
+    model_path = os.path.join(exp_dir, "best_model.pth")
+
+
     # import pdb; pdb.set_trace()
     # conf["train_conf"]["masknet"].update({"n_src": 2})
     model =  getattr(look2hear.models, config["train_conf"]["audionet"]["audionet_name"]).from_pretrain(

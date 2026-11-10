@@ -40,6 +40,8 @@ parser.add_argument(
 )
 
 def main(config):
+    torch.set_float32_matmul_precision('high')
+    
     print_only(
         "Instantiating datamodule <{}>".format(config["datamodule"]["data_name"])
     )
@@ -128,7 +130,7 @@ def main(config):
         filename="{epoch}",
         monitor="val_loss/dataloader_idx_0",
         mode="min",
-        save_top_k=5,
+        save_top_k=2,
         verbose=True,
         save_last=True,
     )
@@ -147,12 +149,16 @@ def main(config):
     logger_dir = os.path.join(os.getcwd(), "Experiments", "tensorboard_logs")
     os.makedirs(os.path.join(logger_dir, config["exp"]["exp_name"]), exist_ok=True)
     # comet_logger = TensorBoardLogger(logger_dir, name=config["exp"]["exp_name"])
+    run_id = config["exp"]["exp_name"]
     comet_logger = WandbLogger(
-            name=config["exp"]["exp_name"], 
-            save_dir=os.path.join(logger_dir, config["exp"]["exp_name"]), 
-            project="Real-work-dataset",
-            # offline=True
+        name=run_id,
+        id=run_id,
+        resume="allow",
+        save_dir=os.path.join(logger_dir, run_id),
+        project="Real-work-dataset",
+        # offline=True
     )
+
 
     trainer = pl.Trainer(
         max_epochs=config["training"]["epochs"],
@@ -160,17 +166,25 @@ def main(config):
         default_root_dir=exp_dir,
         devices=gpus,
         accelerator=distributed_backend,
-        strategy=DDPStrategy(find_unused_parameters=True),
+#        strategy=DDPStrategy(find_unused_parameters=True),
+        strategy="auto" if len(gpus) == 1 else DDPStrategy(find_unused_parameters=True),
         limit_train_batches=1.0,  # Useful for fast experiment
+        limit_val_batches=0.2,
         gradient_clip_val=5.0,
         logger=comet_logger,
-        sync_batchnorm=True,
-        # precision="bf16-mixed",
+        # sync_batchnorm=True,
+        sync_batchnorm=False,
+        precision="bf16-mixed",
         # num_sanity_val_steps=0,
         # sync_batchnorm=True,
         # fast_dev_run=True,
     )
-    trainer.fit(system)
+    last_ckpt = os.path.join(exp_dir, "last.ckpt")
+    ckpt_to_resume = last_ckpt if os.path.isfile(last_ckpt) else None
+    if ckpt_to_resume:
+        print_only(f"[Resume] Found checkpoint, resuming training from: {ckpt_to_resume}")
+
+    trainer.fit(system, ckpt_path=ckpt_to_resume)
     print_only("Finished Training")
     best_k = {k: v.item() for k, v in checkpoint.best_k_models.items()}
     with open(os.path.join(exp_dir, "best_k_models.json"), "w") as f:
