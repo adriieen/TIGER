@@ -31,7 +31,7 @@ loss:
 # Training config
 training:
   system: AudioLightningModule
-  gpus: [0,1,2,3,4,5,6,7]
+  gpus: [0,1]
   parallel: ddp
   epochs: 500
   early_stop: 
@@ -76,4 +76,4 @@ datamodule:
 
 
 exp:
-  exp_name: TIGER-EchoSet_cleaned_small-even_split
+  exp_name: TIGER-EchoSet_cleaned_small-even_split-2gpus

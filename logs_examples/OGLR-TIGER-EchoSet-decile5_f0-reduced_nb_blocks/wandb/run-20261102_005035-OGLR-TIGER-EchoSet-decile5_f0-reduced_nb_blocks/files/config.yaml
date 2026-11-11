@@ -1,0 +1,261 @@
+_wandb:
+    value:
+        cli_version: 0.30.0
+        e:
+            hgp0b37wazaz4c0ntbk8sjnt7gf3l8p3:
+                args:
+                    - --conf_dir
+                    - /idiap/home/adubois/project_ma1/TIGER/configs/EchoSet_cleaned/training_per_feature/f0_mean/deciles/decile5_f0mean.yml
+                codePath: audio_train.py
+                codePathLocal: audio_train.py
+                cpu_count: 44
+                cpu_count_logical: 44
+                cudaVersion: "13.4"
+                disk:
+                    /:
+                        total: "162037379072"
+                        used: "358248448"
+                email: adrien.ja.dubois@gmail.com
+                executable: /idiap/temp/adubois/miniconda3/envs/tiger/bin/python
+                git:
+                    commit: 9e625c0475d7c05bc69e6a0a2837e53ffff3f1b0
+                    remote: https://github.com/adriieen/TIGER.git
+                gpu: NVIDIA GeForce RTX 3090
+                gpu_count: 8
+                gpu_nvidia:
+                    - architecture: Ampere
+                      cudaCores: 10496
+                      memoryTotal: "25769803776"
+                      name: NVIDIA GeForce RTX 3090
+                      uuid: GPU-754acd7a-21ed-efab-c4a3-c4d6232bfa7f
+                    - architecture: Ampere
+                      cudaCores: 10496
+                      memoryTotal: "25769803776"
+                      name: NVIDIA GeForce RTX 3090
+                      uuid: GPU-ccbd3b66-e827-29e3-ce8c-01a4a910bdcd
+                    - architecture: Ampere
+                      cudaCores: 10496
+                      memoryTotal: "25769803776"
+                      name: NVIDIA GeForce RTX 3090
+                      uuid: GPU-5c6244da-b441-7ef5-a899-d2278a473ba9
+                    - architecture: Ampere
+                      cudaCores: 10496
+                      memoryTotal: "25769803776"
+                      name: NVIDIA GeForce RTX 3090
+                      uuid: GPU-c0da5ccf-3fdf-c422-fe1e-172031dcb7c5
+                    - architecture: Ampere
+                      cudaCores: 10496
+                      memoryTotal: "25769803776"
+                      name: NVIDIA GeForce RTX 3090
+                      uuid: GPU-874fc1f4-648b-4fc6-dcaa-39b7a164261c
+                    - architecture: Ampere
+                      cudaCores: 10496
+                      memoryTotal: "25769803776"
+                      name: NVIDIA GeForce RTX 3090
+                      uuid: GPU-c12656e8-d6ea-283a-403c-95b54f22723e
+                    - architecture: Ampere
+                      cudaCores: 10496
+                      memoryTotal: "25769803776"
+                      name: NVIDIA GeForce RTX 3090
+                      uuid: GPU-85570e64-a3b2-65a0-4b45-7e87458e48cd
+                    - architecture: Ampere
+                      cudaCores: 10496
+                      memoryTotal: "25769803776"
+                      name: NVIDIA GeForce RTX 3090
+                      uuid: GPU-501a8b76-8a1f-2179-a369-89b7266a5942
+                host: hgni02
+                memory:
+                    total: "810186883072"
+                os: Linux-6.12.0-211.67.1.el10_2.x86_64-x86_64-with-glibc2.39
+                program: /remote/idiap.svm/home.active/adubois/project_ma1/TIGER/audio_train.py
+                python: CPython 3.10.21
+                root: /remote/idiap.svm/home.active/adubois/project_ma1/TIGER/Experiments/tensorboard_logs/OGLR-TIGER-EchoSet-decile5_f0-reduced_nb_blocks
+                slurm:
+                    cluster_name: catogne
+                    conf: /var/spool/slurmd/conf-cache/slurm.conf
+                    cpus_on_node: "16"
+                    cpus_per_task: "16"
+                    gpus: rtx3090:8
+                    gpus_on_node: "8"
+                    gtids: "0"
+                    job_account: pause
+                    job_cpus_per_node: "16"
+                    job_end_time: "1793636180"
+                    job_exclusive: "NO"
+                    job_gid: "666"
+                    job_gpus: 0,1,2,3,4,5,6,7
+                    job_id: "3831997"
+                    job_name: tiger-all-deciles
+                    job_nodelist: hgni02
+                    job_num_nodes: "1"
+                    job_oversubscribe: "NO"
+                    job_partition: gpu
+                    job_qos: gpu_48h
+                    job_sluid: sE3NM68JGD3W00
+                    job_start_time: "1793466980"
+                    job_uid: "2242"
+                    job_user: adubois
+                    jobid: "3831997"
+                    mem_per_node: "65536"
+                    nnodes: "1"
+                    nodelist: hgni02
+                    oom_kill_step: "0"
+                    prio_process: "0"
+                    step_id: "-5"
+                    stepid: "-5"
+                    submit_dir: /remote/idiap.svm/home.active/adubois/project_ma1/TIGER
+                    submit_host: vws173
+                    task_pid: "2357923"
+                    tasks_per_node: "1"
+                    topology_addr: hgni02
+                    topology_addr_pattern: node
+                    tres_per_task: cpu=16
+                startedAt: "2026-11-01T23:50:35.940850Z"
+                writerId: hgp0b37wazaz4c0ntbk8sjnt7gf3l8p3
+        m:
+            - "1": trainer/global_step
+              "6":
+                - 3
+              "7": []
+            - "2": '*'
+              "5": 1
+              "6":
+                - 1
+              "7": []
+        python_version: 3.10.21
+        t:
+            "1":
+                - 1
+                - 5
+                - 9
+                - 11
+                - 41
+                - 49
+                - 53
+                - 103
+            "2":
+                - 1
+                - 5
+                - 9
+                - 11
+                - 41
+                - 49
+                - 50
+                - 53
+                - 103
+            "3":
+                - 7
+                - 13
+                - 14
+                - 66
+            "4": 3.10.21
+            "5": 0.30.0
+            "6": 4.47.1
+            "12": 0.30.0
+            "13": linux-x86_64
+audionet_audionet_config_in_channels:
+    value: 256
+audionet_audionet_config_num_blocks:
+    value: 4
+audionet_audionet_config_num_sources:
+    value: 2
+audionet_audionet_config_out_channels:
+    value: 128
+audionet_audionet_config_stride:
+    value: 160
+audionet_audionet_config_upsampling_depth:
+    value: 3
+audionet_audionet_config_win:
+    value: 640
+audionet_audionet_name:
+    value: TIGER
+datamodule_data_config_batch_size:
+    value: 3
+datamodule_data_config_n_src:
+    value: 2
+datamodule_data_config_normalize_audio:
+    value: false
+datamodule_data_config_num_workers:
+    value: 2
+datamodule_data_config_persistent_workers:
+    value: true
+datamodule_data_config_pin_memory:
+    value: true
+datamodule_data_config_sample_rate:
+    value: 16000
+datamodule_data_config_segment:
+    value: 2
+datamodule_data_config_subset_range:
+    value:
+        - 0.4000000059604645
+        - 0.5
+datamodule_data_config_test_dir:
+    value: DataPreProcess/EchoSet_cleaned/test
+datamodule_data_config_train_dir:
+    value: DataPreProcess/EchoSet_cleaned/rankings/F0semitoneFrom27.5Hz_sma3nz_amean
+datamodule_data_config_valid_dir:
+    value: DataPreProcess/EchoSet_cleaned/val
+datamodule_data_name:
+    value: EchoSetDataModule
+exp_exp_name:
+    value: OGLR-TIGER-EchoSet-decile5_f0-reduced_nb_blocks
+loss_train_config_pit_from:
+    value: pw_mtx
+loss_train_config_threshold_byloss:
+    value: false
+loss_train_loss_func:
+    value: PITLossWrapper
+loss_train_sdr_type:
+    value: pairwise_neg_snr
+loss_val_config_pit_from:
+    value: pw_mtx
+loss_val_config_threshold_byloss:
+    value: false
+loss_val_loss_func:
+    value: PITLossWrapper
+loss_val_sdr_type:
+    value: pairwise_neg_sisdr
+main_args_exp_dir:
+    value: /remote/idiap.svm/home.active/adubois/project_ma1/TIGER/Experiments/checkpoint/OGLR-TIGER-EchoSet-decile5_f0-reduced_nb_blocks
+optimizer_lr:
+    value: 0.001
+optimizer_optim_name:
+    value: adam
+optimizer_weight_decay:
+    value: 0
+options_conf_dir:
+    value: /idiap/home/adubois/project_ma1/TIGER/configs/EchoSet_cleaned/training_per_feature/f0_mean/deciles/decile5_f0mean.yml
+options_help:
+    value: None
+scheduler_sche_config_factor:
+    value: 0.5
+scheduler_sche_config_patience:
+    value: 60
+scheduler_sche_name:
+    value: ReduceLROnPlateau
+training_SpeedAug:
+    value: false
+training_early_stop_mode:
+    value: min
+training_early_stop_monitor:
+    value: val_loss/dataloader_idx_0
+training_early_stop_patience:
+    value: 60
+training_early_stop_verbose:
+    value: true
+training_epochs:
+    value: 500
+training_gpus:
+    value:
+        - 0
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+training_parallel:
+    value: ddp
+training_system:
+    value: AudioLightningModule

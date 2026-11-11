@@ -1,12 +1,23 @@
+# Byte-compiled / optimized / OS files
 *.DS_Store
-*.pycExperiments/
-logs/
+*.pyc
+__pycache__/
+
+# Checkpoints and models
+Experiments/
 trained_models/
 *.ckpt
 *.pt
 *.pth
+
+# Large logs and wandb archives
+logs/
+*.wandb
+*.log
+
+# Audio and datasets
+datasets/
+*.tar
 *.tar.gz
 *.parquet
 *.wav
-datasets/
-Experiments/

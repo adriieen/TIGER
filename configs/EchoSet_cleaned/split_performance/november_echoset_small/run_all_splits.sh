@@ -2,11 +2,11 @@
 #SBATCH --job-name=tiger-splits-nov
 #SBATCH --account=pause
 #SBATCH --partition=gpu
-#SBATCH --qos=gpu_48h
-#SBATCH --gpus=rtx3090:6
-#SBATCH --cpus-per-task=12
-#SBATCH --mem=48G
-#SBATCH --time=23:00:00
+#SBATCH --qos=gpu_8h
+#SBATCH --gpus=v100:2
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=16G
+#SBATCH --time=1:00:00
 #SBATCH --output=/idiap/home/adubois/project_ma1/TIGER/logs/%x_%j.out
 #SBATCH --error=/idiap/home/adubois/project_ma1/TIGER/logs/%x_%j.err
 
