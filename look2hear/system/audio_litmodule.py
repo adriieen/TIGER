@@ -154,8 +154,12 @@ class AudioLightningModule(pl.LightningModule):
 
     def on_validation_epoch_end(self):
         # val
-        avg_loss = torch.stack(self.validation_step_outputs).mean()
-        val_loss = torch.mean(self.all_gather(avg_loss))
+        if len(self.validation_step_outputs) > 0:
+            avg_loss = torch.stack(self.validation_step_outputs).mean()
+            val_loss = torch.mean(self.all_gather(avg_loss))
+        else:
+            val_loss = torch.tensor(0.0, device=self.device)
+
         self.log(
             "lr",
             self.optimizer.param_groups[0]["lr"],
@@ -163,20 +167,28 @@ class AudioLightningModule(pl.LightningModule):
             prog_bar=True,
             sync_dist=True,
         )
-        self.logger.experiment.log(
-            {"learning_rate": self.optimizer.param_groups[0]["lr"], "epoch": self.current_epoch}
-        )
-        self.logger.experiment.log(
-            {"val_pit_sisnr": -val_loss, "epoch": self.current_epoch}
-        )
+        if self.trainer.is_global_zero and self.logger is not None and hasattr(self.logger, "experiment"):
+            try:
+                self.logger.experiment.log(
+                    {"learning_rate": self.optimizer.param_groups[0]["lr"], "epoch": self.current_epoch}
+                )
+                self.logger.experiment.log(
+                    {"val_pit_sisnr": -val_loss.item(), "epoch": self.current_epoch}
+                )
+            except Exception:
+                pass
 
         # test
-        if (self.trainer.current_epoch) % 10 == 0:
-            avg_loss = torch.stack(self.test_step_outputs).mean()
-            test_loss = torch.mean(self.all_gather(avg_loss))
-            self.logger.experiment.log(
-                {"test_pit_sisnr": -test_loss, "epoch": self.current_epoch}
-            )
+        if (self.trainer.current_epoch) % 10 == 0 and len(self.test_step_outputs) > 0:
+            avg_test_loss = torch.stack(self.test_step_outputs).mean()
+            test_loss = torch.mean(self.all_gather(avg_test_loss))
+            if self.trainer.is_global_zero and self.logger is not None and hasattr(self.logger, "experiment"):
+                try:
+                    self.logger.experiment.log(
+                        {"test_pit_sisnr": -test_loss.item(), "epoch": self.current_epoch}
+                    )
+                except Exception:
+                    pass
         self.validation_step_outputs.clear()  # free memory
         self.test_step_outputs.clear()  # free memory
 

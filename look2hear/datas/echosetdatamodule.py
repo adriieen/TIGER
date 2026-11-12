@@ -163,8 +163,18 @@ class MP3DDataset(Dataset):
 
                 # Étape 2 : Sous-échantillonnage uniforme à taille fixe N si demandé
                 if self.subset_fixed_samples is not None and self.subset_fixed_samples < len(pool_indices):
-                    rng = np.random.RandomState(self.subset_seed)
-                    selected_indices = sorted(rng.choice(pool_indices, size=self.subset_fixed_samples, replace=False))
+                    if self.subset_mode in ["uniform", "grid", "linspace", "even"]:
+                        # Échantillonnage régulier (grille uniforme) le long de la distribution ordonnée
+                        grid_idx = np.round(np.linspace(0, len(pool_indices) - 1, self.subset_fixed_samples)).astype(int)
+                        grid_idx = sorted(list(dict.fromkeys(grid_idx)))
+                        # Si doublons d'arrondi, combler de manière déterministe
+                        if len(grid_idx) < self.subset_fixed_samples:
+                            remaining = [i for i in range(len(pool_indices)) if i not in set(grid_idx)]
+                            grid_idx = sorted(grid_idx + remaining[:self.subset_fixed_samples - len(grid_idx)])
+                        selected_indices = [pool_indices[i] for i in grid_idx]
+                    else:
+                        rng = np.random.RandomState(self.subset_seed)
+                        selected_indices = sorted(rng.choice(pool_indices, size=self.subset_fixed_samples, replace=False))
                 else:
                     selected_indices = pool_indices
 
