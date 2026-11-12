@@ -67,9 +67,9 @@ def main(config):
 
     # import pdb; pdb.set_trace()
     # conf["train_conf"]["masknet"].update({"n_src": 2})
-    model =  getattr(look2hear.models, config["train_conf"]["audionet"]["audionet_name"]).from_pretrain(
+    model = getattr(look2hear.models, config["train_conf"]["audionet"]["audionet_name"]).from_pretrain(
         model_path,
-        sample_rate=config["train_conf"]["datamodule"]["data_config"]["sample_rate"],
+        sample_rate=16000,
         **config["train_conf"]["audionet"]["audionet_config"],
     )
     if config["train_conf"]["training"]["gpus"]:
