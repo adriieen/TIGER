@@ -4,6 +4,7 @@ plot_f0_quintiles_valid.py
 
 Plots the Delta F0 distribution on the validation set (EchoSet_cleaned_small)
 superimposed with the training quintile boundaries to show coverage.
+Generates plots both in semitones and in Hz.
 """
 
 from pathlib import Path
@@ -39,9 +40,17 @@ f0_col = "dist_F0semitoneFrom27.5Hz_sma3nz_amean"
 deltas_train_st = df_train[f0_col].dropna().values
 deltas_val_st = df_val[f0_col].dropna().values
 
+def semitone_to_approx_hz(st, ref_f0=150.0):
+    return ref_f0 * (2.0 ** (st / 12.0) - 1.0)
+
+deltas_train_hz = semitone_to_approx_hz(deltas_train_st)
+deltas_val_hz = semitone_to_approx_hz(deltas_val_st)
+
 # Training quintiles
 quintiles_st = np.percentile(deltas_train_st, [20, 40, 60, 80])
-q_edges = [0.0] + list(quintiles_st) + [np.inf]
+quintiles_hz = semitone_to_approx_hz(quintiles_st)
+q_edges_st = [0.0] + list(quintiles_st) + [np.inf]
+q_edges_hz = [0.0] + list(quintiles_hz) + [np.inf]
 
 OUTPUT_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -49,17 +58,21 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 # Compute validation coverage per training quintile
 val_coverages = []
 for i in range(5):
-    mask = (deltas_val_st >= q_edges[i]) & (deltas_val_st < q_edges[i+1])
+    mask = (deltas_val_st >= q_edges_st[i]) & (deltas_val_st < q_edges_st[i+1])
     pct = mask.mean() * 100.0
     val_coverages.append(pct)
 
 print("=" * 65)
 print("COUVERTURE DU VALIDATION SET SELON LES QUINTILES DE TRAIN :")
 for i, pct in enumerate(val_coverages, 1):
-    print(f"  Quintile {i} [{q_edges[i-1]:.2f} - {q_edges[i]:.2f} st] : {pct:.1f}% des paires de validation")
+    print(f"  Quintile {i} [{q_edges_st[i-1]:.2f} - {q_edges_st[i]:.2f} st | {q_edges_hz[i-1]:.1f} - {q_edges_hz[i]:.1f} Hz] : {pct:.1f}% des paires de validation")
 print("=" * 65)
 
-# Plot
+palette = ["#e76f51", "#f4a261", "#e9c46a", "#264653"]
+
+# -------------------------------------------------------------
+# PLOT 1: En demi-tons (semitones)
+# -------------------------------------------------------------
 fig, ax = plt.subplots(figsize=(12, 6))
 
 sns.histplot(
@@ -74,7 +87,6 @@ sns.histplot(
     label=f"Validation Set Distribution (n={len(deltas_val_st):,})"
 )
 
-palette = ["#e76f51", "#f4a261", "#e9c46a", "#264653"]
 for idx, (th_st, color) in enumerate(zip(quintiles_st, palette), 1):
     pct_val_below = (deltas_val_st <= th_st).mean() * 100.0
     ax.axvline(
@@ -87,8 +99,8 @@ for idx, (th_st, color) in enumerate(zip(quintiles_st, palette), 1):
 
 y_max = ax.get_ylim()[1]
 for i in range(5):
-    high_edge = min(q_edges[i+1], 18.0)
-    mid_x = (q_edges[i] + high_edge) / 2.0
+    high_edge = min(q_edges_st[i+1], 18.0)
+    mid_x = (q_edges_st[i] + high_edge) / 2.0
     ax.text(
         mid_x, y_max * 0.85, f"Q{i+1}\n({val_coverages[i]:.1f}%)",
         ha="center", va="center", fontsize=10, fontweight="bold",
@@ -101,8 +113,55 @@ ax.set_ylabel("Density", fontsize=12, fontweight="bold")
 ax.set_xlim(0, np.percentile(deltas_val_st, 99.5))
 ax.legend(loc="upper right", frameon=True, fontsize=9.5)
 
-out_val = OUTPUT_DIR / "distribution_f0_val_quintiles.png"
-plt.savefig(out_val, dpi=300, bbox_inches="tight")
+out_val_st = OUTPUT_DIR / "distribution_f0_val_quintiles.png"
+plt.savefig(out_val_st, dpi=300, bbox_inches="tight")
 plt.close()
-print(f"✅ Saved: {out_val}")
+print(f"✅ Saved: {out_val_st}")
 
+# -------------------------------------------------------------
+# PLOT 2: En Hz
+# -------------------------------------------------------------
+fig, ax = plt.subplots(figsize=(12, 6))
+
+sns.histplot(
+    deltas_val_hz,
+    bins=60,
+    kde=True,
+    color="#2a9d8f",
+    alpha=0.55,
+    stat="density",
+    edgecolor="black",
+    ax=ax,
+    label=f"Validation Set Distribution (n={len(deltas_val_hz):,})"
+)
+
+for idx, (th_hz, th_st, color) in enumerate(zip(quintiles_hz, quintiles_st, palette), 1):
+    pct_val_below = (deltas_val_hz <= th_hz).mean() * 100.0
+    ax.axvline(
+        th_hz,
+        color=color,
+        linestyle="--",
+        linewidth=2.0,
+        label=f"Train Q{idx} Cut ({th_hz:.1f} Hz / {th_st:.2f} st) -> {pct_val_below:.1f}% <= Cut"
+    )
+
+y_max_hz = ax.get_ylim()[1]
+for i in range(5):
+    high_edge_hz = min(q_edges_hz[i+1], 330.0)
+    mid_x_hz = (q_edges_hz[i] + high_edge_hz) / 2.0
+    ax.text(
+        mid_x_hz, y_max_hz * 0.85, f"Q{i+1}\n({val_coverages[i]:.1f}%)",
+        ha="center", va="center", fontsize=10, fontweight="bold",
+        bbox=dict(boxstyle="round,pad=0.3", facecolor="white", alpha=0.7, edgecolor="gray")
+    )
+
+ax.set_title(r"Validation Set $\Delta F_0$ Distribution (Hz) Superimposed with Training Quintile Thresholds", fontsize=14, fontweight="bold")
+ax.set_xlabel(r"Pairwise $\Delta F_0$ (Hz approx relative to 150 Hz)", fontsize=12, fontweight="bold")
+ax.set_ylabel("Density", fontsize=12, fontweight="bold")
+ax.set_xlim(0, np.percentile(deltas_val_hz, 99.5))
+ax.legend(loc="upper right", frameon=True, fontsize=9.5)
+
+out_val_hz = OUTPUT_DIR / "distribution_f0_val_quintiles_hz.png"
+plt.savefig(out_val_hz, dpi=300, bbox_inches="tight")
+plt.close()
+print(f"✅ Saved: {out_val_hz}")

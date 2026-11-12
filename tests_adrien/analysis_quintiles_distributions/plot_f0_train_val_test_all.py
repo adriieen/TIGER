@@ -135,6 +135,56 @@ print(f"✅ Saved: {out_superimposed}")
 
 
 # =========================================================================
+# FIGURE 1-bis : Superposition Train / Validation / Test en Hz
+# =========================================================================
+fig, ax = plt.subplots(figsize=(14, 7))
+
+sns.kdeplot(tr_hz, color="#1d3557", linewidth=2.5, label=f"Train Set (n={len(tr_hz):,}, mean={tr_hz.mean():.1f} Hz)", ax=ax)
+sns.kdeplot(val_hz, color="#2a9d8f", linewidth=2.5, linestyle="--", label=f"Validation Set (n={len(val_hz):,}, mean={val_hz.mean():.1f} Hz)", ax=ax)
+sns.kdeplot(te_hz, color="#e76f51", linewidth=2.5, linestyle="-.", label=f"Test Set (n={len(te_hz):,}, mean={te_hz.mean():.1f} Hz)", ax=ax)
+
+ax.hist(tr_hz, bins=60, density=True, alpha=0.20, color="#1d3557", edgecolor="none")
+ax.hist(val_hz, bins=60, density=True, alpha=0.15, color="#2a9d8f", edgecolor="none")
+ax.hist(te_hz, bins=60, density=True, alpha=0.15, color="#e76f51", edgecolor="none")
+
+q_edges_hz = [0.0] + list(quintiles_hz) + [np.inf]
+for idx, (th_hz, th_st, color) in enumerate(zip(quintiles_hz, quintiles_st, palette_lines), 1):
+    ax.axvline(
+        th_hz,
+        color=color,
+        linestyle=":",
+        linewidth=2.4,
+        label=f"Train Q{idx} Cut ({idx*20}%): {th_hz:.1f} Hz ({th_st:.2f} st)"
+    )
+
+y_top_hz = ax.get_ylim()[1]
+for i in range(5):
+    high_bound_hz = min(q_edges_hz[i+1], 340.0)
+    mid_x_hz = (q_edges_hz[i] + high_bound_hz) / 2.0
+    ax.text(
+        mid_x_hz, y_top_hz * 0.88,
+        f"Quintile {i+1}\nTr: {tr_cov[i]:.1f}%\nVal: {val_cov[i]:.1f}%\nTe: {te_cov[i]:.1f}%",
+        ha="center", va="center", fontsize=9.5, fontweight="bold",
+        bbox=dict(boxstyle="round,pad=0.35", facecolor="#f8f9fa", alpha=0.85, edgecolor="#ced4da")
+    )
+
+ax.set_title(
+    r"Complete $\Delta F_0$ Distribution in Hz: Train vs Valid vs Test Sets with Training Quintile Thresholds",
+    fontsize=14,
+    fontweight="bold"
+)
+ax.set_xlabel(r"Mean Pairwise $\Delta F_0$ (Hz approx relative to 150 Hz)", fontsize=13, fontweight="bold")
+ax.set_ylabel("Density", fontsize=13, fontweight="bold")
+ax.set_xlim(0, 360.0)
+ax.legend(loc="upper right", frameon=True, fontsize=10)
+
+out_superimposed_hz = OUTPUT_DIR / "distribution_deltaf0_train_val_test_hz_superimposed.png"
+plt.savefig(out_superimposed_hz, dpi=300, bbox_inches="tight")
+plt.close()
+print(f"✅ Saved: {out_superimposed_hz}")
+
+
+# =========================================================================
 # FIGURE 2 : 3 Panneaux côte-à-côte (Train | Validation | Test) en demi-tons
 # =========================================================================
 fig, axes = plt.subplots(1, 3, figsize=(20, 5.5), sharey=True, sharex=True)
