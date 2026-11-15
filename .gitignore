@@ -21,3 +21,5 @@ datasets/
 *.tar.gz
 *.parquet
 *.wav
+
+testing_models
