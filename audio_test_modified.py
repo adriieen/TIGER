@@ -49,9 +49,12 @@ parser.add_argument(
 
 def load_model(conf, model_path, device):
     audionet_name = conf["audionet"]["audionet_name"]
-    audionet_config = conf["audionet"]["audionet_config"]
+    audionet_config = dict(conf["audionet"]["audionet_config"])
 
-    # 1. Instancier l'architecture
+    # Forcer explicitement le sample_rate à 16000 Hz dans le marbre
+    audionet_config["sample_rate"] = 16000
+
+    # 1. Instancier l'architecture avec sample_rate=16000
     model_class = getattr(look2hear.models, audionet_name)
     model = model_class(**audionet_config)
 
