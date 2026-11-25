@@ -22,4 +22,4 @@ datasets/
 *.parquet
 *.wav
 
-testing_models
+testing_models/

@@ -1,0 +1,130 @@
+_wandb:
+    value:
+        cli_version: 0.30.0
+        e:
+            i2e3dl5agn73cb0iwrzry6vumlleyyf7:
+                args:
+                    - --epochs
+                    - "60"
+                    - --batch_size
+                    - "64"
+                    - --num_workers
+                    - "4"
+                codePath: mixture_of_experts/train_router.py
+                codePathLocal: train_router.py
+                cpu_count: 44
+                cpu_count_logical: 44
+                cudaVersion: "13.4"
+                disk:
+                    /:
+                        total: "162037379072"
+                        used: "359297024"
+                email: adrien.ja.dubois@gmail.com
+                executable: /idiap/temp/adubois/miniconda3/envs/tiger/bin/python
+                git:
+                    commit: ff75106c356137417a5be0dda5fc18bb5a2929c7
+                    remote: git@github.com:adriieen/TIGER.git
+                gpu: NVIDIA GeForce RTX 3090
+                gpu_count: 1
+                gpu_nvidia:
+                    - architecture: Ampere
+                      cudaCores: 10496
+                      memoryTotal: "25769803776"
+                      name: NVIDIA GeForce RTX 3090
+                      uuid: GPU-5c6244da-b441-7ef5-a899-d2278a473ba9
+                host: hgni02
+                memory:
+                    total: "810186883072"
+                os: Linux-6.12.0-211.67.1.el10_2.x86_64-x86_64-with-glibc2.39
+                program: /remote/idiap.svm/home.active/adubois/project_ma1/TIGER/mixture_of_experts/train_router.py
+                python: CPython 3.10.21
+                root: /remote/idiap.svm/home.active/adubois/project_ma1/TIGER/mixture_of_experts
+                slurm:
+                    cluster_name: catogne
+                    conf: /var/spool/slurmd/conf-cache/slurm.conf
+                    cpus_on_node: "6"
+                    cpus_per_task: "6"
+                    gpus: rtx3090:1
+                    gpus_on_node: "1"
+                    gtids: "0"
+                    job_account: pause
+                    job_cpus_per_node: "6"
+                    job_end_time: "1795009199"
+                    job_exclusive: "NO"
+                    job_gid: "666"
+                    job_gpus: "4"
+                    job_id: "3850908"
+                    job_name: deltaf0-router
+                    job_nodelist: hgni02
+                    job_num_nodes: "1"
+                    job_oversubscribe: "NO"
+                    job_partition: gpu
+                    job_qos: gpu_8h
+                    job_sluid: sE3NM7QAQGNS00
+                    job_start_time: "1795005599"
+                    job_uid: "2242"
+                    job_user: adubois
+                    jobid: "3850908"
+                    localid: "0"
+                    mem_per_node: "32768"
+                    nnodes: "1"
+                    nodeid: "0"
+                    nodelist: hgni02
+                    oom_kill_step: "0"
+                    prio_process: "0"
+                    procid: "0"
+                    step_id: "-5"
+                    stepid: "-5"
+                    submit_dir: /remote/idiap.svm/home.active/adubois/project_ma1
+                    submit_host: vws173
+                    task_pid: "2627990"
+                    tasks_per_node: "1"
+                    topology_addr: hgni02
+                    topology_addr_pattern: node
+                    tres_per_task: cpu=6
+                startedAt: "2026-11-18T12:40:18.615715Z"
+                writerId: i2e3dl5agn73cb0iwrzry6vumlleyyf7
+        m: []
+        python_version: 3.10.21
+        t:
+            "1":
+                - 1
+            "2":
+                - 1
+            "3":
+                - 2
+                - 13
+                - 16
+                - 61
+            "4": 3.10.21
+            "5": 0.30.0
+            "12": 0.30.0
+            "13": linux-x86_64
+batch_size:
+    value: 64
+data_root:
+    value: /idiap/home/adubois/project_ma1/TIGER/DataPreProcess/EchoSet_cleaned_small
+epochs:
+    value: 60
+lr:
+    value: 0.001
+no_wandb:
+    value: false
+num_workers:
+    value: 4
+parquet_root:
+    value: /idiap/temp/adubois/EchoSet_cleaned_small
+save_dir:
+    value: /idiap/home/adubois/project_ma1/TIGER/mixture_of_experts/checkpoints
+seed:
+    value: 42
+train_crop_sec:
+    value: 2
+val_crop_sec:
+    value: null
+wandb_name:
+    value: DeltaF0Router-EchoSet_small
+wandb_project:
+    value: Real-work-dataset
+weight_decay:
+    value: 0.01
